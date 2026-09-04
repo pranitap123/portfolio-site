@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pranita Panchal — Backend Engineer</title>
+<meta name="description" content="Pranita Panchal — backend engineer building secure APIs, encryption systems, and distributed infrastructure.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080B0F;
+    --surface:#0E1319;
+    --surface-2:#121820;
+    --rule:#1F262E;
+    --rule-bright:#38434F;
+    --text:#EAEEF1;
+    --text-muted:#8593A0;
+    --text-dim:#4B555F;
+    --signal:#4FE0D0;
+    --signal-deep:#1E5A54;
+    --amber:#E8B14C;
+    --violet:#8B7BE8;
+    --rose:#E8657F;
+    --radius:3px;
+    --maxw:1180px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:.001ms!important;transition-duration:.001ms!important;}
+  }
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:16px;line-height:1.6;overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--signal);color:var(--bg);}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--signal);outline-offset:3px;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 40px;}
+  @media (max-width:640px){.wrap{padding:0 22px;}}
+
+  /* grain overlay — subtle depth, no blur/glass */
+  body::after{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:100;
+    opacity:.028;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---- rail ---- */
+  .rail{position:fixed;left:26px;top:50%;transform:translateY(-50%);height:230px;width:14px;z-index:60;
+    display:flex;flex-direction:column;align-items:center;justify-content:space-between;}
+  .rail-track{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--rule);transform:translateX(-50%);}
+  .rail-fill{position:absolute;left:50%;top:0;width:1px;background:linear-gradient(180deg,var(--signal),var(--violet));transform:translateX(-50%);height:0%;transition:height .09s linear;}
+  .rail-dot{position:relative;width:5px;height:5px;border-radius:50%;background:var(--rule-bright);z-index:2;
+    transition:background .3s,box-shadow .3s,transform .3s;cursor:pointer;}
+  .rail-dot.active{background:var(--signal);box-shadow:0 0 0 4px rgba(79,224,208,.13);transform:scale(1.25);}
+  @media (max-width:900px){.rail{display:none;}}
+
+  /* ---- nav ---- */
+  header{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(8,11,15,.85);
+    border-bottom:1px solid var(--rule);}
+  .nav-inner{max-width:var(--maxw);margin:0 auto;padding:18px 40px;display:flex;align-items:center;justify-content:space-between;}
+  @media (max-width:640px){.nav-inner{padding:15px 22px;}}
+  .brand{font-size:15px;font-weight:600;display:flex;align-items:center;gap:9px;}
+  .brand-dot{width:7px;height:7px;border-radius:50%;background:var(--signal);
+    box-shadow:0 0 10px 1px rgba(79,224,208,.7);animation:pulse 3s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+  nav.links{display:flex;gap:30px;}
+  nav.links a{font-size:13.5px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;transition:color .2s;}
+  nav.links a:hover{color:var(--signal);}
+  @media (max-width:760px){nav.links{display:none;}}
+  .nav-cta{font-family:'IBM Plex Mono',monospace;font-size:12.5px;border:1px solid var(--rule-bright);
+    padding:8px 14px;border-radius:var(--radius);transition:border-color .2s,background .2s;}
+  .nav-cta:hover{border-color:var(--signal);background:rgba(79,224,208,.07);}
+
+  /* ---- hero ---- */
+  .hero{position:relative;min-height:100vh;display:flex;align-items:center;padding-top:90px;overflow:hidden;}
+  #hero-canvas{position:absolute;top:0;right:0;width:60%;height:100%;opacity:0;transition:opacity 1.8s ease;}
+  #hero-canvas.ready{opacity:1;}
+  @media (max-width:900px){#hero-canvas{width:100%;opacity:.3;}}
+  .hero-inner{position:relative;z-index:2;max-width:650px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--signal);
+    display:flex;align-items:center;gap:10px;margin-bottom:22px;}
+  .eyebrow::before{content:'';width:24px;height:1px;background:var(--signal);}
+  h1.headline{font-size:clamp(2.3rem,5vw,3.55rem);font-weight:600;line-height:1.12;letter-spacing:-.012em;margin-bottom:22px;}
+  h1.headline span{color:var(--text-muted);font-weight:400;}
+  .hero-sub{font-size:17px;color:var(--text-muted);max-width:530px;margin-bottom:34px;line-height:1.65;}
+  .hero-sub b{color:var(--text);font-weight:500;}
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:46px;}
+  .btn{font-family:'IBM Plex Mono',monospace;font-size:13.5px;padding:13px 22px;border-radius:var(--radius);
+    display:inline-flex;align-items:center;gap:8px;transition:transform .2s cubic-bezier(.2,.8,.2,1),border-color .2s,background .2s;}
+  .btn-primary{background:var(--signal);color:#052622;font-weight:500;}
+  .btn-primary:hover{transform:translateY(-3px);}
+  .btn-ghost{border:1px solid var(--rule-bright);}
+  .btn-ghost:hover{border-color:var(--signal);transform:translateY(-3px);}
+  .hero-meta{display:flex;gap:36px;flex-wrap:wrap;padding-top:28px;border-top:1px solid var(--rule);}
+  .meta-item .num{font-family:'IBM Plex Mono',monospace;font-size:22px;display:block;}
+  .meta-item .lbl{font-size:12px;color:var(--text-dim);margin-top:2px;}
+
+  /* hero staged entrance — one orchestrated moment */
+  .stagger>*{opacity:0;transform:translateY(18px);animation:rise .9s cubic-bezier(.2,.8,.2,1) forwards;}
+  .stagger>*:nth-child(1){animation-delay:.1s;}
+  .stagger>*:nth-child(2){animation-delay:.22s;}
+  .stagger>*:nth-child(3){animation-delay:.34s;}
+  .stagger>*:nth-child(4){animation-delay:.46s;}
+  .stagger>*:nth-child(5){animation-delay:.58s;}
+  @keyframes rise{to{opacity:1;transform:translateY(0);}}
+
+  /* ---- sections ---- */
+  section{padding:120px 0;position:relative;}
+  @media (max-width:640px){section{padding:80px 0;}}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:54px;
+    padding-bottom:22px;border-bottom:1px solid var(--rule);gap:20px;flex-wrap:wrap;}
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--signal);}
+  .section-title{font-size:clamp(1.6rem,3vw,2.1rem);font-weight:600;}
+  .section-note{font-size:14px;color:var(--text-dim);max-width:290px;text-align:right;}
+  @media (max-width:640px){.section-note{text-align:left;max-width:100%;}}
+
+  /* ---- work ---- */
+  .work-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:20px;}
+  .card{grid-column:span 3;background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);
+    padding:28px;display:flex;flex-direction:column;position:relative;overflow:hidden;
+    opacity:0;transform:translateY(20px);
+    transition:opacity .7s cubic-bezier(.2,.8,.2,1),transform .7s cubic-bezier(.2,.8,.2,1),border-color .3s;}
+  .card.in{opacity:1;transform:translateY(0);}
+  .card:hover{border-color:var(--rule-bright);}
+  .card.feature{grid-column:span 6;}
+  @media (max-width:900px){.card,.card.feature{grid-column:span 6;}}
+
+  .card-viz{width:100%;height:150px;border-radius:var(--radius);margin-bottom:22px;
+    background:#0A0F14;border:1px solid var(--rule);overflow:hidden;position:relative;}
+  .card.feature .card-viz{height:210px;}
+  .card-viz canvas{width:100%;height:100%;display:block;}
+
+  .card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px;}
+  .card-title{font-size:19px;font-weight:600;}
+  .card.feature .card-title{font-size:23px;}
+  .card-tag{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text-dim);
+    border:1px solid var(--rule);padding:3px 8px;border-radius:2px;white-space:nowrap;}
+  .card-desc{font-size:14.5px;color:var(--text-muted);margin-bottom:18px;line-height:1.62;flex-grow:1;}
+  .card.feature .card-desc{font-size:15.5px;max-width:760px;}
+  .card-stack{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px;}
+  .chip{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);
+    background:var(--surface-2);border:1px solid var(--rule);padding:4px 9px;border-radius:2px;
+    transition:border-color .25s,color .25s;}
+  .card:hover .chip{border-color:var(--rule-bright);}
+  .card-links{display:flex;gap:20px;padding-top:16px;border-top:1px solid var(--rule);}
+  .card-links a{font-family:'IBM Plex Mono',monospace;font-size:12.5px;transition:color .2s;}
+  .card-links a:hover{color:var(--signal);}
+
+  /* ---- strip ---- */
+  .strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);
+    border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;}
+  @media (max-width:760px){.strip{grid-template-columns:1fr;}}
+  .strip-item{background:var(--surface);padding:32px 28px;transition:background .3s;}
+  .strip-item:hover{background:var(--surface-2);}
+  .strip-num{font-family:'IBM Plex Mono',monospace;font-size:31px;color:var(--signal);display:block;margin-bottom:10px;}
+  .strip-label{font-size:14.5px;margin-bottom:6px;font-weight:500;}
+  .strip-sub{font-size:13px;color:var(--text-dim);line-height:1.55;}
+
+  /* ---- skills ---- */
+  .skills-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--rule);border-radius:var(--radius);}
+  @media (max-width:760px){.skills-grid{grid-template-columns:1fr;}}
+  .skill-col{padding:26px 28px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);}
+  .skill-col:nth-child(3n){border-right:none;}
+  .skill-col:nth-last-child(-n+3){border-bottom:none;}
+  @media (max-width:760px){
+    .skill-col{border-right:none;border-bottom:1px solid var(--rule);}
+    .skill-col:last-child{border-bottom:none;}
+  }
+  .skill-head{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--text-dim);
+    margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--rule);}
+  .skill-list{font-size:14px;color:var(--text-muted);line-height:2;}
+
+  /* ---- education ---- */
+  .edu-row{display:flex;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--rule);gap:20px;flex-wrap:wrap;}
+  .edu-row:last-child{border-bottom:none;}
+  .edu-name{font-size:15.5px;font-weight:500;}
+  .edu-school{font-size:13.5px;color:var(--text-dim);margin-top:3px;}
+  .edu-time{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text-dim);white-space:nowrap;}
+
+  /* ---- footer ---- */
+  footer{padding:100px 0 50px;border-top:1px solid var(--rule);}
+  .footer-top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:36px;margin-bottom:60px;}
+  .footer-headline{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:600;max-width:530px;line-height:1.2;}
+  .footer-links{display:flex;flex-direction:column;gap:12px;}
+  .footer-links a{font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--text-muted);transition:color .2s,transform .2s;display:inline-block;}
+  .footer-links a:hover{color:var(--signal);transform:translateX(4px);}
+  .footer-bottom{display:flex;justify-content:space-between;padding-top:26px;border-top:1px solid var(--rule);
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-dim);flex-wrap:wrap;gap:10px;}
+</style>
+</head>
+<body>
+
+<div class="rail" aria-hidden="true">
+  <div class="rail-track"></div>
+  <div class="rail-fill" id="railFill"></div>
+  <div class="rail-dot" data-target="hero"></div>
+  <div class="rail-dot" data-target="work"></div>
+  <div class="rail-dot" data-target="research"></div>
+  <div class="rail-dot" data-target="skills"></div>
+  <div class="rail-dot" data-target="contact"></div>
+</div>
+
+<header>
+  <div class="nav-inner">
+    <a href="#hero" class="brand"><span class="brand-dot"></span>PRANITA PANCHAL</a>
+    <nav class="links">
+      <a href="#work">Work</a><a href="#research">Research</a><a href="#skills">Stack</a><a href="#contact">Contact</a>
+    </nav>
+    <a class="nav-cta" href="mailto:pranitapanchal339@gmail.com">Get in touch</a>
+  </div>
+</header>
+
+<section class="hero" id="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="wrap">
+    <div class="hero-inner stagger">
+      <div class="eyebrow">BACKEND ENGINEER · PUNE, INDIA</div>
+      <h1 class="headline">Building systems that hold up<br><span>under real load, real attackers, and real traffic.</span></h1>
+      <p class="hero-sub">I design and ship <b>secure REST APIs</b>, <b>encryption systems</b>, and <b>containerized backend services</b> — TypeScript/Node.js and PostgreSQL by default, with authentication, RBAC, and rate limiting built from first principles rather than bolted on.</p>
+      <div class="hero-actions">
+        <a href="#work" class="btn btn-primary">View Work</a>
+        <a href="https://github.com/pranitap123" target="_blank" rel="noopener" class="btn btn-ghost">GitHub ↗</a>
+        <a href="mailto:pranitapanchal339@gmail.com" class="btn btn-ghost">Email</a>
+      </div>
+      <div class="hero-meta">
+        <div class="meta-item"><span class="num">2×</span><span class="lbl">National hackathon finalist</span></div>
+        <div class="meta-item"><span class="num">5</span><span class="lbl">Production backends shipped</span></div>
+        <div class="meta-item"><span class="num">1</span><span class="lbl">Published paper, IJSREM 2026</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="work">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-label">01 · SELECTED WORK</div>
+        <div class="section-title">Five backends, one engineering identity</div>
+      </div>
+      <div class="section-note">Each one independently designed, built, and deployed — not templated off the others.</div>
+    </div>
+
+    <div class="work-grid">
+
+      <div class="card feature">
+        <div class="card-viz"><canvas data-viz="vault"></canvas></div>
+        <div class="card-top">
+          <div class="card-title">CipherVault</div>
+          <div class="card-tag">FLAGSHIP</div>
+        </div>
+        <div class="card-desc">Encrypted file storage and secret-management service. JWT auth, AES-256 encryption at rest, and role-based access control enforcing per-role permission boundaries for multi-tenant credential isolation. Audit logging and rate-limiting middleware built from scratch — no third-party dependency doing the hard part. Fully containerized with Docker Compose, documented end-to-end in Swagger/OpenAPI, developed over 150+ commits.</div>
+        <div class="card-stack">
+          <span class="chip">TypeScript</span><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">PostgreSQL</span><span class="chip">Prisma</span><span class="chip">Docker</span><span class="chip">JWT</span><span class="chip">AES-256</span><span class="chip">RBAC</span><span class="chip">Vitest</span>
+        </div>
+        <div class="card-links">
+          <a href="https://github.com/pranitap123/CipherVault" target="_blank" rel="noopener">GITHUB ↗</a>
+          <a href="https://cipher-vault-smoky.vercel.app/" target="_blank" rel="noopener">LIVE DEMO ↗</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-viz"><canvas data-viz="conduit"></canvas></div>
+        <div class="card-top">
+          <div class="card-title">Conduit AI</div>
+          <div class="card-tag">GATEWAY</div>
+        </div>
+        <div class="card-desc">LLM gateway handling auth, per-tenant quotas, usage metering, cost accounting, tenant-safe caching, idempotent retries, and streaming — a proxy layer that treats model calls like billable infrastructure, not chat requests.</div>
+        <div class="card-stack">
+          <span class="chip">Fastify</span><span class="chip">TypeScript</span><span class="chip">Kysely</span><span class="chip">PostgreSQL</span><span class="chip">Redis</span><span class="chip">React 19</span>
+        </div>
+        <div class="card-links">
+          <a href="https://github.com/pranitap123/conduit-ai" target="_blank" rel="noopener">GITHUB ↗</a>
+          <a href="https://conduit-ai-dashboard-three.vercel.app/" target="_blank" rel="noopener">LIVE DEMO ↗</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-viz"><canvas data-viz="graph"></canvas></div>
+        <div class="card-top">
+          <div class="card-title">Jurisynth AI</div>
+          <div class="card-tag">LEGAL INTEL</div>
+        </div>
+        <div class="card-desc">Legal intelligence platform processing real case corpora. JWT + TOTP MFA session security, PostgreSQL and Neo4j schemas, Redis-cached queries, and a unified API layer connecting an XGBoost risk engine, graph traversal, and document retrieval.</div>
+        <div class="card-stack">
+          <span class="chip">FastAPI</span><span class="chip">Neo4j</span><span class="chip">Redis</span><span class="chip">XGBoost</span><span class="chip">TOTP MFA</span><span class="chip">React</span>
+        </div>
+        <div class="card-links">
+          <a href="https://github.com/pranitap123/Jurisynth-AI" target="_blank" rel="noopener">GITHUB ↗</a>
+          <a href="https://jurisynth.in/" target="_blank" rel="noopener">LIVE DEMO ↗</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-viz"><canvas data-viz="radar"></canvas></div>
+        <div class="card-top">
+          <div class="card-title">ARGUS-PRISM</div>
+          <div class="card-tag">FINALIST</div>
+        </div>
+        <div class="card-desc">Real-time mule-account detection system targeting ₹36,014 Cr in annual bank fraud, built across five detection engines — graph analysis, behavioral scoring, taint tracking, STR generation, threat mapping. Validated against RBI/FIU regulatory benchmarks.</div>
+        <div class="card-stack">
+          <span class="chip">Graph Analysis</span><span class="chip">Taint Tracking</span><span class="chip">Fraud Detection</span><span class="chip">Data Validation</span>
+        </div>
+        <div class="card-links">
+          <a href="https://github.com/pranitap123/Argus---prism-" target="_blank" rel="noopener">GITHUB ↗</a>
+          <a href="https://argus-prism.vercel.app/" target="_blank" rel="noopener">LIVE DEMO ↗</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-viz"><canvas data-viz="flow"></canvas></div>
+        <div class="card-top">
+          <div class="card-title">AssetFlow</div>
+          <div class="card-tag">ODOO</div>
+        </div>
+        <div class="card-desc">Enterprise asset and resource management platform built on Odoo for the national hackathon. Contributed data validation, functional testing, documentation, and seed-data verification across the submission.</div>
+        <div class="card-stack">
+          <span class="chip">Odoo</span><span class="chip">Enterprise Systems</span><span class="chip">Testing</span>
+        </div>
+        <div class="card-links">
+          <a href="https://github.com/pranitap123/AssetFlow" target="_blank" rel="noopener">GITHUB ↗</a>
+          <a href="https://assetflow-frontend-lemon.vercel.app/" target="_blank" rel="noopener">LIVE DEMO ↗</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="research">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-label">02 · RECOGNITION</div>
+        <div class="section-title">Research &amp; competitive results</div>
+      </div>
+    </div>
+    <div class="strip">
+      <div class="strip-item">
+        <span class="strip-num" data-count="16000" data-suffix="+">0</span>
+        <div class="strip-label">iDEA 2.0 — National Finalist</div>
+        <div class="strip-sub">Union Bank of India · 16,000+ applicants narrowed to 1,500+ final teams · presented ARGUS-PRISM to banking technology executives and regulators.</div>
+      </div>
+      <div class="strip-item">
+        <span class="strip-num" data-count="20000" data-suffix="+">0</span>
+        <div class="strip-label">Odoo Hackathon 2026 — National Final Round</div>
+        <div class="strip-sub">Selected for the national final round from over 20,000 applicants, with AssetFlow.</div>
+      </div>
+      <div class="strip-item">
+        <span class="strip-num" data-count="86" data-suffix="%">0</span>
+        <div class="strip-label">IJSREM Journal, Vol. 10, Issue 6</div>
+        <div class="strip-sub">Primary co-author. Domain-adaptive legal text processing framework: 0.34 compression ratio, 86% fact retention, 0.90 explainability score using FAISS vector search.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-label">03 · STACK</div>
+        <div class="section-title">What I actually reach for</div>
+      </div>
+      <div class="section-note">Strongest in TypeScript, Node.js, and PostgreSQL — everything else is chosen when the problem calls for it.</div>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-col"><div class="skill-head">LANGUAGES</div><div class="skill-list">TypeScript<br>JavaScript (ES2022+)<br>Python<br>SQL<br>Java<br>C++</div></div>
+      <div class="skill-col"><div class="skill-head">BACKEND</div><div class="skill-list">Node.js / Express.js<br>FastAPI<br>REST API Design<br>JWT · OAuth 2.0<br>Microservices<br>Async I/O · Zod</div></div>
+      <div class="skill-col"><div class="skill-head">DATA</div><div class="skill-list">PostgreSQL · Prisma<br>MongoDB<br>Neo4j<br>Redis<br>MySQL</div></div>
+      <div class="skill-col"><div class="skill-head">SECURITY</div><div class="skill-list">AES-256 Encryption<br>Bcrypt<br>RBAC<br>Rate Limiting<br>Audit Logging<br>TOTP MFA</div></div>
+      <div class="skill-col"><div class="skill-head">DEVOPS &amp; CLOUD</div><div class="skill-list">Docker · Compose<br>GitHub Actions / CI-CD<br>Linux/Unix<br>Vercel · Render<br>AWS (basics)</div></div>
+      <div class="skill-col"><div class="skill-head">TESTING &amp; TOOLS</div><div class="skill-list">Postman<br>Swagger / OpenAPI<br>Git &amp; GitHub<br>Vitest</div></div>
+    </div>
+
+    <div style="margin-top:58px;">
+      <div class="edu-row">
+        <div>
+          <div class="edu-name">B.Tech, Computer Science &amp; Engineering</div>
+          <div class="edu-school">PCET's Nutan College of Engineering and Research, Pune</div>
+        </div>
+        <div class="edu-time">2023 – 2026</div>
+      </div>
+      <div class="edu-row">
+        <div>
+          <div class="edu-name">Diploma, Computer Science &amp; Engineering</div>
+          <div class="edu-school">Dr. D.Y. Patil Pratishthan's Y.B. Patil Polytechnic, Akurdi</div>
+        </div>
+        <div class="edu-time">2020 – 2023</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <footer>
+      <div class="footer-top">
+        <div class="footer-headline">Open to backend and infrastructure roles — remote or onsite, worldwide.</div>
+        <div class="footer-links">
+          <a href="mailto:pranitapanchal339@gmail.com">pranitapanchal339@gmail.com ↗</a>
+          <a href="https://github.com/pranitap123" target="_blank" rel="noopener">github.com/pranitap123 ↗</a>
+          <a href="https://linkedin.com/in/pranitapanchal" target="_blank" rel="noopener">linkedin.com/in/pranitapanchal ↗</a>
+          <a href="https://x.com/pranitabuilds" target="_blank" rel="noopener">x.com/pranitabuilds ↗</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Pranita Panchal</span><span>Pune, Maharashtra, India</span>
+      </div>
+    </footer>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* =========================================================
+   HERO — 3D distributed mesh with travelling request packets
+   ========================================================= */
+(function(){
+  const canvas=document.getElementById('hero-canvas');
+  if(!window.THREE||!canvas) return;
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x080B0F,0.075);
+  const camera=new THREE.PerspectiveCamera(50,1,0.1,100);
+  camera.position.set(0,0,9.5);
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+
+  function resize(){
+    const r=canvas.getBoundingClientRect();
+    renderer.setSize(r.width,r.height,false);
+    camera.aspect=r.width/r.height;camera.updateProjectionMatrix();
+  }
+
+  const group=new THREE.Group();scene.add(group);
+  const nodes=[],N=40;
+  const geoBig=new THREE.IcosahedronGeometry(0.11,0);
+  const geoSm=new THREE.SphereGeometry(0.038,8,8);
+  const matHot=new THREE.MeshBasicMaterial({color:0x4FE0D0});
+  const matCool=new THREE.MeshBasicMaterial({color:0x1E5A54});
+  const matEdgeNode=new THREE.MeshBasicMaterial({color:0x8B7BE8});
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+
+  for(let i=0;i<N;i++){
+    const hub=i%9===0;
+    const mat=hub?(i%18===0?matEdgeNode:matHot):matCool;
+    const m=new THREE.Mesh(hub?geoBig:geoSm,mat);
+    const R=rnd(1.7,4.4),th=rnd(0,Math.PI*2),ph=rnd(0,Math.PI);
+    m.position.set(R*Math.sin(ph)*Math.cos(th),R*Math.cos(ph)*0.8,R*Math.sin(ph)*Math.sin(th)-1);
+    m.userData={base:m.position.clone(),ph:Math.random()*6.28,hub};
+    group.add(m);nodes.push(m);
+  }
+
+  // edges
+  const edges=[];
+  for(let i=0;i<nodes.length;i++){
+    const d=[];
+    for(let j=0;j<nodes.length;j++){if(i!==j)d.push([j,nodes[i].position.distanceTo(nodes[j].position)]);}
+    d.sort((a,b)=>a[1]-b[1]);
+    for(let k=0;k<2;k++){
+      const j=d[k][0],key=i<j?i+'-'+j:j+'-'+i;
+      if(!edges.some(e=>e.key===key)) edges.push({key,a:i,b:j,delay:(i+j)*0.011});
+    }
+  }
+  const lineGeo=new THREE.BufferGeometry();
+  const lp=new Float32Array(edges.length*6);
+  lineGeo.setAttribute('position',new THREE.BufferAttribute(lp,3));
+  const lines=new THREE.LineSegments(lineGeo,new THREE.LineBasicMaterial({color:0x263039,transparent:true,opacity:.6}));
+  group.add(lines);
+
+  // travelling packets along edges
+  const PK=16;
+  const pkGeo=new THREE.BufferGeometry();
+  const pkPos=new Float32Array(PK*3);
+  pkGeo.setAttribute('position',new THREE.BufferAttribute(pkPos,3));
+  const packets=[];
+  for(let i=0;i<PK;i++) packets.push({e:Math.floor(Math.random()*edges.length),t:Math.random(),spd:rnd(.15,.42)});
+  const pkMat=new THREE.PointsMaterial({color:0x4FE0D0,size:0.13,transparent:true,opacity:.95,sizeAttenuation:true});
+  group.add(new THREE.Points(pkGeo,pkMat));
+
+  const clock=new THREE.Clock();
+  let mx=0,my=0,tmx=0,tmy=0;
+  window.addEventListener('mousemove',e=>{
+    tmx=(e.clientX/window.innerWidth)-.5;
+    tmy=(e.clientY/window.innerHeight)-.5;
+  });
+
+  let ready=false;
+  function frame(){
+    requestAnimationFrame(frame);
+    const t=clock.getElapsedTime();
+
+    nodes.forEach(n=>{
+      n.position.y=n.userData.base.y+Math.sin(t*.55+n.userData.ph)*.07;
+      if(n.userData.hub) n.rotation.y+=.006, n.rotation.x+=.003;
+    });
+
+    const pa=lineGeo.attributes.position.array;
+    edges.forEach((e,i)=>{
+      const lt=Math.max(0,Math.min(1,(t-e.delay)/1.0));
+      const A=nodes[e.a].position,B=nodes[e.b].position;
+      pa[i*6]=A.x;pa[i*6+1]=A.y;pa[i*6+2]=A.z;
+      pa[i*6+3]=A.x+(B.x-A.x)*lt;pa[i*6+4]=A.y+(B.y-A.y)*lt;pa[i*6+5]=A.z+(B.z-A.z)*lt;
+    });
+    lineGeo.attributes.position.needsUpdate=true;
+
+    const pp=pkGeo.attributes.position.array;
+    packets.forEach((p,i)=>{
+      p.t+=p.spd*0.016;
+      if(p.t>1){p.t=0;p.e=Math.floor(Math.random()*edges.length);}
+      const e=edges[p.e],A=nodes[e.a].position,B=nodes[e.b].position;
+      pp[i*3]=A.x+(B.x-A.x)*p.t;
+      pp[i*3+1]=A.y+(B.y-A.y)*p.t;
+      pp[i*3+2]=A.z+(B.z-A.z)*p.t;
+    });
+    pkGeo.attributes.position.needsUpdate=true;
+
+    mx+=(tmx-mx)*.045; my+=(tmy-my)*.045;
+    group.rotation.y+=reduce?0:.0011;
+    group.rotation.y+=(mx*.45-(group.rotation.y%6.283))*.004;
+    group.rotation.x+=(-my*.25-group.rotation.x)*.05;
+
+    renderer.render(scene,camera);
+    if(!ready&&t>.35){ready=true;canvas.classList.add('ready');}
+  }
+  resize();window.addEventListener('resize',resize);frame();
+})();
+
+/* =========================================================
+   PROJECT VISUALS — one distinct animated system per project
+   ========================================================= */
+(function(){
+  const C={signal:'#4FE0D0',deep:'#1E5A54',violet:'#8B7BE8',amber:'#E8B14C',rose:'#E8657F',dim:'rgba(255,255,255,.22)',rule:'rgba(255,255,255,.07)'};
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setup(canvas){
+    const dpr=Math.min(window.devicePixelRatio,2);
+    const r=canvas.getBoundingClientRect();
+    canvas.width=r.width*dpr;canvas.height=r.height*dpr;
+    const ctx=canvas.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {ctx,w:r.width,h:r.height};
+  }
+
+  /* --- CipherVault: plaintext grid resolving into ciphertext blocks --- */
+  function vault(ctx,w,h,t){
+    ctx.clearRect(0,0,w,h);
+    const cols=26,rows=9;
+    const cw=w/cols,ch=h/rows;
+    for(let y=0;y<rows;y++){
+      for(let x=0;x<cols;x++){
+        const wave=Math.sin(x*0.35-t*1.6+y*0.4);
+        const enc=wave>0.1;
+        const px=x*cw+2,py=y*ch+2,pw=cw-4,phh=ch-4;
+        if(enc){
+          ctx.fillStyle='rgba(79,224,208,'+(0.10+Math.abs(wave)*0.28)+')';
+          ctx.fillRect(px,py,pw,phh);
+          ctx.fillStyle='rgba(79,224,208,'+(0.35+Math.abs(wave)*0.4)+')';
+          ctx.fillRect(px,py+phh*0.42,pw*(0.3+((x*7+y*13)%10)/14),1.4);
+        }else{
+          ctx.fillStyle='rgba(255,255,255,0.05)';
+          ctx.fillRect(px,py,pw,phh);
+          ctx.fillStyle='rgba(255,255,255,0.16)';
+          ctx.fillRect(px,py+phh*0.42,pw*0.55,1.2);
+        }
+      }
+    }
+    // encryption boundary sweep
+    const bx=((Math.sin(t*0.8)*0.5+0.5))*w;
+    ctx.strokeStyle='rgba(79,224,208,.75)';ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.moveTo(bx,0);ctx.lineTo(bx,h);ctx.stroke();
+  }
+
+  /* --- Conduit AI: metered pipeline, requests flowing through a gate --- */
+  function conduit(ctx,w,h,t){
+    ctx.clearRect(0,0,w,h);
+    const lanes=5,gy=h/2,gateX=w*0.52;
+    for(let l=0;l<lanes;l++){
+      const y=(h/(lanes+1))*(l+1);
+      ctx.strokeStyle=C.rule;ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+      for(let i=0;i<4;i++){
+        let p=((t*(0.16+l*0.035)+i*0.25+l*0.11)%1);
+        const x=p*w;
+        const past=x>gateX;
+        const throttled=(l===3&&past);
+        if(throttled) continue;
+        ctx.fillStyle=past?C.signal:'rgba(255,255,255,.4)';
+        ctx.fillRect(x-5,y-2,10,4);
+      }
+    }
+    // gate
+    ctx.strokeStyle='rgba(139,123,232,.8)';ctx.lineWidth=1.4;
+    ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(gateX,6);ctx.lineTo(gateX,h-6);ctx.stroke();
+    ctx.setLineDash([]);
+    // meter bar
+    const usage=(Math.sin(t*0.5)*0.5+0.5)*0.7+0.2;
+    ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(w-58,10,44,5);
+    ctx.fillStyle=usage>0.75?C.amber:C.signal;ctx.fillRect(w-58,10,44*usage,5);
+  }
+
+  /* --- Jurisynth: knowledge graph with traversal highlighting --- */
+  function graph(ctx,w,h,t){
+    ctx.clearRect(0,0,w,h);
+    const n=13,pts=[];
+    for(let i=0;i<n;i++){
+      const a=(i/n)*Math.PI*2+t*0.06;
+      const R=(i%3===0?Math.min(w,h)*0.34:Math.min(w,h)*0.22);
+      pts.push({x:w/2+Math.cos(a)*R*1.6,y:h/2+Math.sin(a)*R});
+    }
+    const path=[0,4,8,2,10,6];
+    for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+      if((i*j+i+j)%4!==0) continue;
+      ctx.strokeStyle=C.rule;ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke();
+    }
+    const seg=(t*0.55)%path.length;
+    for(let k=0;k<path.length-1;k++){
+      const a=pts[path[k]],b=pts[path[k+1]];
+      const prog=Math.max(0,Math.min(1,seg-k));
+      if(prog<=0) continue;
+      ctx.strokeStyle='rgba(139,123,232,.9)';ctx.lineWidth=1.6;
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(a.x+(b.x-a.x)*prog,a.y+(b.y-a.y)*prog);ctx.stroke();
+    }
+    pts.forEach((p,i)=>{
+      const on=path.indexOf(i)>=0&&path.indexOf(i)<=seg;
+      ctx.beginPath();ctx.arc(p.x,p.y,on?4:2.4,0,6.283);
+      ctx.fillStyle=on?C.violet:C.dim;ctx.fill();
+    });
+  }
+
+  /* --- ARGUS-PRISM: radar sweep flagging anomalous accounts --- */
+  function radar(ctx,w,h,t){
+    ctx.clearRect(0,0,w,h);
+    const cx=w/2,cy=h/2,R=Math.min(w,h)*0.44;
+    for(let i=1;i<=3;i++){
+      ctx.strokeStyle=C.rule;ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(cx,cy,R*i/3,0,6.283);ctx.stroke();
+    }
+    const ang=t*0.9%6.283;
+    const g=ctx.createConicGradient?null:null;
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(ang);
+    ctx.fillStyle='rgba(79,224,208,.10)';
+    ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R,-0.55,0);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='rgba(79,224,208,.8)';ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(R,0);ctx.stroke();
+    ctx.restore();
+
+    const blips=[[0.6,0.9],[1.9,0.5],[3.1,0.75],[4.2,0.35],[5.3,0.85],[2.5,0.25],[4.9,0.6]];
+    blips.forEach((b,i)=>{
+      const a=b[0],d=b[1]*R;
+      const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d;
+      let diff=(ang-a+6.283)%6.283;
+      const lit=diff<1.6;
+      const flag=i%3===0;
+      ctx.beginPath();ctx.arc(x,y,lit?(flag?4.5:3):2.2,0,6.283);
+      ctx.fillStyle=lit?(flag?C.rose:C.signal):'rgba(255,255,255,.16)';
+      ctx.fill();
+      if(lit&&flag){
+        ctx.strokeStyle='rgba(232,101,127,'+(1-diff/1.6)*0.8+')';ctx.lineWidth=1;
+        ctx.beginPath();ctx.arc(x,y,9+(diff*8),0,6.283);ctx.stroke();
+      }
+    });
+  }
+
+  /* --- AssetFlow: assets moving through lifecycle stages --- */
+  function flow(ctx,w,h,t){
+    ctx.clearRect(0,0,w,h);
+    const stages=4,pad=16;
+    const colW=(w-pad*2)/stages;
+    for(let s=0;s<stages;s++){
+      const x=pad+s*colW;
+      ctx.strokeStyle=C.rule;ctx.lineWidth=1;
+      ctx.strokeRect(x+3,10,colW-6,h-20);
+      ctx.fillStyle='rgba(255,255,255,.05)';
+      ctx.fillRect(x+3,10,colW-6,16);
+    }
+    for(let i=0;i<9;i++){
+      const cycle=(t*0.22+i*0.13)%1;
+      const s=Math.min(stages-1,Math.floor(cycle*stages));
+      const inner=(cycle*stages)%1;
+      const x=pad+s*colW+8;
+      const y=34+((i*23)%(h-60));
+      const bw=colW-22;
+      ctx.fillStyle=s===stages-1?'rgba(79,224,208,.55)':'rgba(232,177,76,'+(0.25+inner*0.4)+')';
+      ctx.fillRect(x,y,bw,9);
+      ctx.fillStyle='rgba(255,255,255,.28)';
+      ctx.fillRect(x,y,bw*0.35,9);
+    }
+  }
+
+  const renderers={vault,conduit,graph,radar,flow};
+  const active=new Set();
+
+  document.querySelectorAll('.card-viz canvas').forEach(cv=>{
+    const kind=cv.dataset.viz;
+    let dims=setup(cv);
+    const item={cv,kind,dims,t:Math.random()*10};
+    cv._item=item;
+
+    const io=new IntersectionObserver(es=>{
+      es.forEach(e=>{ e.isIntersecting?active.add(item):active.delete(item); });
+    },{threshold:0.05});
+    io.observe(cv);
+
+    // draw one static frame immediately
+    renderers[kind](item.dims.ctx,item.dims.w,item.dims.h,item.t);
+  });
+
+  let last=performance.now();
+  function loop(now){
+    requestAnimationFrame(loop);
+    const dt=Math.min((now-last)/1000,0.05);last=now;
+    if(reduce) return;
+    active.forEach(it=>{
+      it.t+=dt;
+      renderers[it.kind](it.dims.ctx,it.dims.w,it.dims.h,it.t);
+    });
+  }
+  requestAnimationFrame(loop);
+
+  let rt;
+  window.addEventListener('resize',()=>{
+    clearTimeout(rt);
+    rt=setTimeout(()=>{
+      document.querySelectorAll('.card-viz canvas').forEach(cv=>{
+        if(cv._item) cv._item.dims=setup(cv);
+      });
+    },180);
+  });
+})();
+
+/* ================= rail + reveals + counters ================= */
+(function(){
+  const fill=document.getElementById('railFill');
+  const dots=document.querySelectorAll('.rail-dot');
+  const secs=Array.from(dots).map(d=>document.getElementById(d.dataset.target));
+  function onScroll(){
+    const doc=document.documentElement;
+    const p=doc.scrollTop/(doc.scrollHeight-doc.clientHeight);
+    fill.style.height=Math.max(0,Math.min(1,p))*100+'%';
+    let idx=0;
+    secs.forEach((s,i)=>{if(s&&s.getBoundingClientRect().top<window.innerHeight*0.5)idx=i;});
+    dots.forEach((d,i)=>d.classList.toggle('active',i===idx));
+  }
+  document.addEventListener('scroll',onScroll,{passive:true});onScroll();
+  dots.forEach(d=>d.addEventListener('click',()=>{
+    const el=document.getElementById(d.dataset.target);
+    if(el)el.scrollIntoView({behavior:'smooth'});
+  }));
+})();
+
+(function(){
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});
+  },{threshold:.12});
+  document.querySelectorAll('.card').forEach((c,i)=>{
+    c.style.transitionDelay=(i%3)*0.07+'s';
+    io.observe(c);
+  });
+})();
+
+(function(){
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(!e.isIntersecting)return;
+      io.unobserve(e.target);
+      const el=e.target,target=parseInt(el.dataset.count,10),sfx=el.dataset.suffix||'+';
+      const dur=1300,st=performance.now();
+      (function tick(now){
+        const p=Math.min(1,(now-st)/dur),e2=1-Math.pow(1-p,3);
+        const v=Math.round(target*e2);
+        el.textContent=(v>=1000?v.toLocaleString('en-IN'):v)+(p>=1?sfx:'');
+        if(p<1)requestAnimationFrame(tick);
+      })(st);
+    });
+  },{threshold:.5});
+  document.querySelectorAll('.strip-num[data-count]').forEach(n=>io.observe(n));
+})();
+</script>
+</body>
+</html>
